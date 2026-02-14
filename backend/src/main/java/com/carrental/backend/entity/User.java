@@ -31,6 +31,11 @@ public class User {
 
     private LocalDateTime createdAt;
 
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
+
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)
     private java.util.List<Car> cars;
 
