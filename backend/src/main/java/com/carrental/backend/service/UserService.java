@@ -1,6 +1,7 @@
 package com.carrental.backend.service;
 
 
+import com.carrental.backend.dto.AuthResponse;
 import com.carrental.backend.dto.LoginRequest;
 import com.carrental.backend.dto.RegisterRequest;
 import com.carrental.backend.entity.User;
@@ -20,9 +21,10 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public String register(RegisterRequest request) {
+    public AuthResponse register(RegisterRequest request) {
         if(userRepository.findByEmail(request.getEmail()).isPresent()){
-            return "Email already exists";
+            throw new RuntimeException("Email already exists");
+
         }
 
         User user = new User();
@@ -33,18 +35,18 @@ public class UserService {
 
         userRepository.save(user);
 
-        return "User registered successfully";
+        return new AuthResponse("User registered Successfully");
     }
 
-    public String login(LoginRequest request) {
+    public AuthResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         if(passwordEncoder.matches(request.getPassword(), user.getPassword())){
-            return "Login successful";
+            return new AuthResponse("Login successful");
         }
 
-        return "Invalid credentials";
+        throw new RuntimeException("Invalid credentials");
     }
 
 }
