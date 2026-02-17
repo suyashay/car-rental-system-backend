@@ -2,6 +2,7 @@ package com.carrental.backend.service;
 
 import com.carrental.backend.dto.AddCarRequest;
 import com.carrental.backend.dto.AuthResponse;
+import com.carrental.backend.dto.CarResponse;
 import com.carrental.backend.entity.Car;
 import com.carrental.backend.entity.User;
 import com.carrental.backend.entity.enums.CarStatus;
@@ -9,6 +10,8 @@ import com.carrental.backend.entity.enums.UserRole;
 import com.carrental.backend.repository.CarRepository;
 import com.carrental.backend.repository.UserRepository;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class CarService {
@@ -43,5 +46,43 @@ public class CarService {
         System.out.println("Owner role: " + owner.getRole());
 
         return new AuthResponse("car added successfully");
+    }
+
+    public List<CarResponse> getAllCars() {
+
+        return carRepository.findAll()
+                .stream()
+                .map(car -> new CarResponse(
+                        car.getId(),
+                        car.getModel(),
+                        car.getSeats(),
+                        car.getPricePerDay(),
+                        car.getStatus()))
+                .toList();
+    }
+
+    public List<CarResponse> searchBySeats(int seats) {
+
+        return carRepository.findBySeats(seats)
+                .stream()
+                .map(car -> new CarResponse(
+                        car.getId(),
+                        car.getModel(),
+                        car.getSeats(),
+                        car.getPricePerDay(),
+                        car.getStatus()))
+                .toList();
+    }
+
+    public List<CarResponse> getAvailableCars() {
+        return carRepository.findByStatus(CarStatus.AVAILABLE)
+                .stream()
+                .map(car -> new CarResponse(
+                        car.getId(),
+                        car.getModel(),
+                        car.getSeats(),
+                        car.getPricePerDay(),
+                        car.getStatus()))
+                .toList();
     }
 }
