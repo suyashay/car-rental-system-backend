@@ -7,6 +7,29 @@ Availability
 Document
 Payment
 
+User
+- id
+- name
+- email
+- password
+- role
+
+Car
+- id
+- model
+- seats
+- pricePerDay
+- owner
+
+Booking
+- id
+- car
+- user
+- startDate
+- endDate
+- totalAmount
+- status
+
 📌 SECTION 1 — Booking Conflict Logic
 
 1 Problem
@@ -94,6 +117,31 @@ Using:
 @Transactional
 
 Ensures atomicity.
-
 Atomicity = All succeed or none succeed.
 
+
+## Future Architecture Improvements
+
+The current system focuses on core booking lifecycle logic.
+Several architectural improvements can enhance scalability,
+security, and production readiness.
+
+### Authentication Layer
+- Implement JWT based authentication
+- Remove userId from API requests
+- Extract authenticated user from security context
+
+### Scheduled Booking Completion
+- Replace manual completion endpoint
+- Use Spring Scheduler to automatically mark bookings as completed daily
+
+### Concurrency Control
+- Introduce transaction management for booking creation
+- Prevent race conditions during overlapping booking checks
+
+### Payment Integration
+- Introduce payment entity
+- Track payment status for bookings
+
+### Owner Booking Dashboard
+- Allow owners to view bookings for their vehicles
