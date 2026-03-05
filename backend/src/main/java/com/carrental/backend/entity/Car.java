@@ -1,6 +1,7 @@
 package com.carrental.backend.entity;
 
 import com.carrental.backend.entity.enums.CarStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -31,6 +32,7 @@ public class Car {
     private User owner;
 
     @OneToMany(mappedBy = "car", cascade = CascadeType.ALL)
+    @JsonIgnore
     private java.util.List<Booking> bookings;
 
 }

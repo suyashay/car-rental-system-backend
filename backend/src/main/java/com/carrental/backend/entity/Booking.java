@@ -4,6 +4,7 @@ import com.carrental.backend.entity.enums.BookingStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -27,14 +28,21 @@ public class Booking {
     @JoinColumn(name = "car_id", nullable = false)
     private Car car;
 
-    private LocalDateTime startDate;
-    private LocalDateTime endDate;
+    private LocalDate startDate;
+    private LocalDate endDate;
+
+    private double totalAmount;
 
     @Enumerated(EnumType.STRING)
-    private BookingStatus bookingStatus;
+    private BookingStatus Status;
 
-    private double totalPrice;
+    private LocalDateTime createdAt;
+
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
 
     @OneToOne(mappedBy = "booking", cascade = CascadeType.ALL)
     private Payment payment;
+
 }
