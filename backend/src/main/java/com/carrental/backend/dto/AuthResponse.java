@@ -7,13 +7,13 @@ import java.time.LocalDateTime;
 public class AuthResponse {
 
     @Getter
-    private String message;
+    private String token;
 
     @Getter
     private LocalDateTime timestamp;
 
-    public AuthResponse(String message) {
-        this.message = message;
+    public AuthResponse(String token) {
+        this.token = token;
         this.timestamp = LocalDateTime.now();
     }
 }

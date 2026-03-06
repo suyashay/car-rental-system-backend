@@ -11,6 +11,7 @@ import com.carrental.backend.entity.enums.UserRole;
 import com.carrental.backend.repository.BookingRepository;
 import com.carrental.backend.repository.CarRepository;
 import com.carrental.backend.repository.UserRepository;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -35,13 +36,26 @@ public class BookingService {
         this.userRepository = userRepository;
     }
 
+    private User getAuthenticatedUser() {
+
+        String email = SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
+
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
     public AuthResponse createBooking(BookingRequest request) {
 
         Car car = carRepository.findById(request.getCarId())
                 .orElseThrow(() -> new RuntimeException("Car not found"));
 
-        User user = userRepository.findById(request.getCustomerId())
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
+//        User user = userRepository.findById(request.getCustomerId())
+//                .orElseThrow(() -> new RuntimeException("Customer not found"));
+
+        User user = getAuthenticatedUser();
 
         if(user.getRole() != UserRole.CUSTOMER) {
             throw new RuntimeException("Only Customer are allowed to book cars");
@@ -91,8 +105,10 @@ public class BookingService {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new RuntimeException("Booking not found"));
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+//        User user = userRepository.findById(userId)
+//                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        User user = getAuthenticatedUser();
 
         if(!booking.getUser().getId().equals(userId) &&  user.getRole() != UserRole.ADMIN) {
             throw new RuntimeException("You are not authorized to cancel this booking");

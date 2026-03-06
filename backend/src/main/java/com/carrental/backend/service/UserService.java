@@ -7,6 +7,7 @@ import com.carrental.backend.dto.RegisterRequest;
 import com.carrental.backend.entity.User;
 import com.carrental.backend.entity.enums.UserRole;
 import com.carrental.backend.repository.UserRepository;
+import com.carrental.backend.security.JwtUtil;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -16,9 +17,15 @@ public class UserService {
     private UserRepository userRepository;
     private PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    private final JwtUtil jwtUtil;
+
+    public UserService(UserRepository userRepository,
+                       PasswordEncoder passwordEncoder,
+                       JwtUtil jwtUtil) {
+
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil;
     }
 
     public AuthResponse register(RegisterRequest request) {
@@ -43,7 +50,9 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         if(passwordEncoder.matches(request.getPassword(), user.getPassword())){
-            return new AuthResponse("Login successful");
+            String token = jwtUtil.generateToken(user.getEmail());
+
+            return new AuthResponse(token);
         }
 
         throw new RuntimeException("Invalid credentials");

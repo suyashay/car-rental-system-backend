@@ -14,8 +14,8 @@ public class BookingRequest {
     @NotNull
     private Long carId;
 
-    @NotNull
-    private Long customerId;
+//    @NotNull
+//    private Long customerId;
 
     @NotNull
     @FutureOrPresent
