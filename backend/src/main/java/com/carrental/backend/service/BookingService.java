@@ -5,12 +5,16 @@ import com.carrental.backend.dto.BookingRequest;
 import com.carrental.backend.dto.BookingResponse;
 import com.carrental.backend.entity.Booking;
 import com.carrental.backend.entity.Car;
+import com.carrental.backend.entity.Driver;
 import com.carrental.backend.entity.User;
 import com.carrental.backend.entity.enums.BookingStatus;
+import com.carrental.backend.entity.enums.DriverStatus;
 import com.carrental.backend.entity.enums.UserRole;
 import com.carrental.backend.repository.BookingRepository;
 import com.carrental.backend.repository.CarRepository;
+import com.carrental.backend.repository.DriverRepository;
 import com.carrental.backend.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -27,13 +31,16 @@ public class BookingService {
 
     private final UserRepository userRepository;
 
+    private final DriverRepository driverRepository;
+
     public BookingService(
             BookingRepository bookingRepository,
             CarRepository carRepository,
-            UserRepository userRepository) {
+            UserRepository userRepository, DriverRepository driverRepository) {
         this.bookingRepository = bookingRepository;
         this.carRepository = carRepository;
         this.userRepository = userRepository;
+        this.driverRepository = driverRepository;
     }
 
     private User getAuthenticatedUser() {
@@ -47,6 +54,7 @@ public class BookingService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
+    @Transactional
     public AuthResponse createBooking(BookingRequest request) {
 
         Car car = carRepository.findById(request.getCarId())
@@ -76,6 +84,18 @@ public class BookingService {
             throw new RuntimeException("Booking already exists - car booked for selected dates");
         }
 
+        Driver assignedDriver = null;
+
+        if(request.isWithDriver()){
+            assignedDriver = driverRepository
+                    .findFirstByStatus(DriverStatus.AVAILABLE)
+                    .orElseThrow(() ->
+                            new RuntimeException("No drivers available"));
+
+            assignedDriver.setStatus(DriverStatus.ASSIGNED);
+        }
+
+
         long days = ChronoUnit.DAYS.between(
                 request.getStartDate(),
                 request.getEndDate()
@@ -92,6 +112,8 @@ public class BookingService {
         booking.setUser(user);
         booking.setStartDate(request.getStartDate());
         booking.setEndDate(request.getEndDate());
+        booking.setDriver(assignedDriver);
+        booking.setWithDriver(request.isWithDriver());
         booking.setTotalAmount(total);
         booking.setStatus(BookingStatus.CONFIRMED);
 
@@ -152,6 +174,10 @@ public class BookingService {
 
         for (Booking booking : bookings) {
             booking.setStatus(BookingStatus.COMPLETED);
+
+            if(booking.getDriver() != null) {
+                booking.getDriver().setStatus(DriverStatus.AVAILABLE);
+            }
         }
 
         bookingRepository.saveAll(bookings);

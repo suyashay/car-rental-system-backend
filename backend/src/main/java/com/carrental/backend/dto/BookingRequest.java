@@ -24,4 +24,6 @@ public class BookingRequest {
     @NotNull
     @FutureOrPresent
     private LocalDate endDate;
+
+    private boolean withDriver;
 }
