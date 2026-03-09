@@ -60,8 +60,8 @@ public class BookingController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<?> getAllBookings() {
-        return ResponseEntity.ok(bookingService.getAllBookings());
+    public ResponseEntity<?> getAllBookings(@RequestParam int page, @RequestParam int size) {
+        return ResponseEntity.ok(bookingService.getAllBookings(page, size));
     }
 
 }

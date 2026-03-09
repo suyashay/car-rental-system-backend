@@ -15,6 +15,9 @@ import com.carrental.backend.repository.CarRepository;
 import com.carrental.backend.repository.DriverRepository;
 import com.carrental.backend.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -257,7 +260,7 @@ public class BookingService {
                 .toList();
     }
 
-    public List<BookingResponse> getAllBookings() {
+    public Page<BookingResponse> getAllBookings(int page, int size) {
 
         User user = getAuthenticatedUser();
 
@@ -265,11 +268,11 @@ public class BookingService {
             throw new RuntimeException("Only Admin can get all bookings");
         }
 
-        List<Booking>  bookings = bookingRepository.findAll();
+        Pageable pageable = PageRequest.of(page, size);
 
-        return  bookings.stream()
-                .map(this::mapToResponse)
-                .toList();
+        Page<Booking> bookings = bookingRepository.findAll(pageable);
+
+        return  bookings.map(this::mapToResponse);
     }
 
 }
