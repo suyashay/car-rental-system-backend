@@ -44,6 +44,24 @@ public class BookingController {
         return ResponseEntity.ok("Completed bookings update");
     }
 
+    @GetMapping("/my")
+    public ResponseEntity<?>  getMyBookings(){
+        return ResponseEntity.ok(bookingService.getMyBookings());
+    }
 
+    @GetMapping("/owner")
+    public ResponseEntity<?> getOwnerBookings() {
+        return ResponseEntity.ok(bookingService.getOwnerBookings());
+    }
+
+    @GetMapping("/car/{id}")
+    public ResponseEntity<?> getBookingsForCar(@PathVariable Long id) {
+        return ResponseEntity.ok(bookingService.getBookingsForCar(id));
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<?> getAllBookings() {
+        return ResponseEntity.ok(bookingService.getAllBookings());
+    }
 
 }

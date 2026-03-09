@@ -124,6 +124,7 @@ public class BookingService {
     }
 
     public AuthResponse cancelBooking(Long bookingId, Long userId) {
+
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new RuntimeException("Booking not found"));
 
@@ -145,6 +146,11 @@ public class BookingService {
         }
 
         booking.setStatus(BookingStatus.CANCELLED);
+
+        if(booking.getDriver() != null) {
+            booking.getDriver().setStatus(DriverStatus.AVAILABLE);
+        }
+
         bookingRepository.save(booking);
 
         return  new AuthResponse("Booking cancelled successfully");
@@ -156,6 +162,9 @@ public class BookingService {
                 .map(b -> new BookingResponse(
                         b.getId(),
                         b.getCar().getId(),
+                        b.getCar().getModel(),
+                        b.getUser().getEmail(),
+                        b.getDriver().getName(),
                         b.getStartDate(),
                         b.getEndDate(),
                         b.getTotalAmount(),
@@ -167,7 +176,7 @@ public class BookingService {
     public void updateCompletedBookings() {
 
         List<Booking> bookings =
-                bookingRepository.findByStatusAndEndDateLessThanEqual(
+                bookingRepository.findByStatusAndEndDateLessThan(
                         BookingStatus.CONFIRMED,
                         LocalDate.now()
                 );
@@ -181,6 +190,86 @@ public class BookingService {
         }
 
         bookingRepository.saveAll(bookings);
+    }
+
+    private BookingResponse mapToResponse(Booking booking) {
+
+        BookingResponse response = new BookingResponse();
+
+        response.setId(booking.getId());
+        response.setCarModel(booking.getCar().getModel());
+        response.setCustomerEmail(booking.getUser().getEmail());
+
+        if (booking.getDriver() != null) {
+            response.setDriverName(booking.getDriver().getName());
+        }
+
+        response.setStartDate(booking.getStartDate());
+        response.setEndDate(booking.getEndDate());
+        response.setTotalAmount(booking.getTotalAmount());
+        response.setStatus(booking.getStatus());
+
+        return response;
+    }
+
+    public List<BookingResponse> getMyBookings() {
+        User user = getAuthenticatedUser();
+
+        List<Booking>  bookings = bookingRepository.findByUserId(user.getId());
+
+        return bookings.stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+    public List<BookingResponse> getOwnerBookings() {
+        User user = getAuthenticatedUser();
+
+        if(user.getRole() != UserRole.OWNER) {
+            throw new RuntimeException("only Owner can view bookings");
+        }
+
+        List<Booking>  bookings = bookingRepository.findByCarOwnerId(user.getId());
+
+        return bookings.stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+    public List<BookingResponse> getBookingsForCar(Long carId) {
+
+        User user = getAuthenticatedUser();
+
+        Car car = carRepository.findById(carId)
+                .orElseThrow(() -> new RuntimeException("Car not found"));
+
+        boolean isAdmin = user.getRole()  == UserRole.ADMIN;
+        boolean isOwner = car.getOwner().getId().equals(user.getId());
+
+        if(!isAdmin && !isOwner) {
+            throw new RuntimeException("You are not authorized to view this booking");
+        }
+
+        List<Booking>  bookings = bookingRepository.findByCarId(carId);
+
+        return bookings.stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+    public List<BookingResponse> getAllBookings() {
+
+        User user = getAuthenticatedUser();
+
+        if(user.getRole() != UserRole.ADMIN) {
+            throw new RuntimeException("Only Admin can get all bookings");
+        }
+
+        List<Booking>  bookings = bookingRepository.findAll();
+
+        return  bookings.stream()
+                .map(this::mapToResponse)
+                .toList();
     }
 
 }
