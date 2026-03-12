@@ -1,4 +1,4 @@
-package com.carrental.backend.dto;
+package com.carrental.backend.dto.request;
 
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
@@ -26,4 +26,8 @@ public class BookingRequest {
     private LocalDate endDate;
 
     private boolean withDriver;
+
+    private boolean insurance;
+
+    private boolean fuelPackage;
 }

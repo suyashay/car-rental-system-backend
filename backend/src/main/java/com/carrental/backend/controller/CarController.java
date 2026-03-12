@@ -1,10 +1,9 @@
 package com.carrental.backend.controller;
 
 
-import com.carrental.backend.dto.AddCarRequest;
-import com.carrental.backend.dto.AuthResponse;
-import com.carrental.backend.dto.CarResponse;
-import com.carrental.backend.entity.enums.CarStatus;
+import com.carrental.backend.dto.request.AddCarRequest;
+import com.carrental.backend.dto.response.AuthResponse;
+import com.carrental.backend.dto.response.CarResponse;
 import com.carrental.backend.service.CarService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;

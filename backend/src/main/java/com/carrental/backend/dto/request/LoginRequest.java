@@ -1,4 +1,4 @@
-package com.carrental.backend.dto;
+package com.carrental.backend.dto.request;
 
 import lombok.Getter;
 import lombok.Setter;

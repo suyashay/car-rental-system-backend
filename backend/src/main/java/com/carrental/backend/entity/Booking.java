@@ -1,6 +1,7 @@
 package com.carrental.backend.entity;
 
 import com.carrental.backend.entity.enums.BookingStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -43,6 +44,7 @@ public class Booking {
     }
 
     @OneToOne(mappedBy = "booking", cascade = CascadeType.ALL)
+    @JsonIgnore
     private Payment payment;
 
     @ManyToOne

@@ -1,8 +1,8 @@
 package com.carrental.backend.service;
 
-import com.carrental.backend.dto.AddCarRequest;
-import com.carrental.backend.dto.AuthResponse;
-import com.carrental.backend.dto.CarResponse;
+import com.carrental.backend.dto.request.AddCarRequest;
+import com.carrental.backend.dto.response.AuthResponse;
+import com.carrental.backend.dto.response.CarResponse;
 import com.carrental.backend.entity.Car;
 import com.carrental.backend.entity.User;
 import com.carrental.backend.entity.enums.CarStatus;

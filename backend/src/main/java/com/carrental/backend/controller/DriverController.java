@@ -1,6 +1,7 @@
 package com.carrental.backend.controller;
 
-import com.carrental.backend.dto.AddDriverRequest;
+import com.carrental.backend.dto.request.AddDriverRequest;
+import com.carrental.backend.dto.request.DriverRegistrationRequest;
 import com.carrental.backend.entity.enums.DriverStatus;
 import com.carrental.backend.service.DriverService;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,16 @@ public class DriverController {
 
     public DriverController(DriverService driverService) {
         this.driverService = driverService;
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<?> registerDriver(@RequestBody DriverRegistrationRequest request) {
+        return ResponseEntity.ok(driverService.registerDriver(request));
+    }
+
+    @PatchMapping("/{id}/verify")
+    public ResponseEntity<?> verifyDriver(@PathVariable Long id) {
+        return ResponseEntity.ok(driverService.verifyDriver(id));
     }
 
     @PostMapping

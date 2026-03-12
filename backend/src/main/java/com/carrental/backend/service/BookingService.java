@@ -1,8 +1,8 @@
 package com.carrental.backend.service;
 
-import com.carrental.backend.dto.AuthResponse;
-import com.carrental.backend.dto.BookingRequest;
-import com.carrental.backend.dto.BookingResponse;
+import com.carrental.backend.dto.response.AuthResponse;
+import com.carrental.backend.dto.request.BookingRequest;
+import com.carrental.backend.dto.response.BookingResponse;
 import com.carrental.backend.entity.Booking;
 import com.carrental.backend.entity.Car;
 import com.carrental.backend.entity.Driver;
@@ -27,6 +27,10 @@ import java.util.List;
 
 @Service
 public class BookingService {
+
+    private static final double DRIVER_CHARGE_PER_DAY = 800;
+    private static final double INSURANCE_FEE = 500;
+    private static final double FUEL_PACKAGE_FEE = 700;
 
     private final BookingRepository bookingRepository;
 
@@ -60,9 +64,6 @@ public class BookingService {
     @Transactional
     public AuthResponse createBooking(BookingRequest request) {
 
-        Car car = carRepository.findById(request.getCarId())
-                .orElseThrow(() -> new RuntimeException("Car not found"));
-
 //        User user = userRepository.findById(request.getCustomerId())
 //                .orElseThrow(() -> new RuntimeException("Customer not found"));
 
@@ -71,6 +72,9 @@ public class BookingService {
         if(user.getRole() != UserRole.CUSTOMER) {
             throw new RuntimeException("Only Customer are allowed to book cars");
         }
+
+        Car car = carRepository.findCarById(request.getCarId())
+                .orElseThrow(() -> new RuntimeException("Car not found"));
 
         if(request.getEndDate().isBefore(request.getStartDate())) {
             throw new RuntimeException("End date must be after start date");
@@ -87,6 +91,15 @@ public class BookingService {
             throw new RuntimeException("Booking already exists - car booked for selected dates");
         }
 
+        long days = ChronoUnit.DAYS.between(
+                request.getStartDate(),
+                request.getEndDate()
+        ) + 1;
+
+        if (days <= 0) {
+            throw new RuntimeException("Booking must be at least 1 day");
+        }
+
         Driver assignedDriver = null;
 
         if(request.isWithDriver()){
@@ -98,32 +111,42 @@ public class BookingService {
             assignedDriver.setStatus(DriverStatus.ASSIGNED);
         }
 
-
-        long days = ChronoUnit.DAYS.between(
-                request.getStartDate(),
-                request.getEndDate()
-        );
-
-        if (days <= 0) {
-            throw new RuntimeException("Booking must be at least 1 day");
-        }
-
-        double total = days * car.getPricePerDay();
+        double totalAmount = calculateTotalPrice(car, request, days);
 
         Booking booking = new Booking();
+
         booking.setCar(car);
         booking.setUser(user);
         booking.setStartDate(request.getStartDate());
         booking.setEndDate(request.getEndDate());
         booking.setDriver(assignedDriver);
         booking.setWithDriver(request.isWithDriver());
-        booking.setTotalAmount(total);
-        booking.setStatus(BookingStatus.CONFIRMED);
+        booking.setTotalAmount(totalAmount);
+        booking.setStatus(BookingStatus.PENDING_PAYMENT);
 
         bookingRepository.save(booking);
 
-        return new AuthResponse("Booking confirmed");
+        return new AuthResponse("confirm the booking by completing the payment");
 
+    }
+
+    private double calculateTotalPrice(Car car, BookingRequest request, long days){
+
+        double total = days * car.getPricePerDay();
+
+        if(request.isWithDriver()){
+            total += days * DRIVER_CHARGE_PER_DAY;
+        }
+
+        if(request.isInsurance()){
+            total += INSURANCE_FEE;
+        }
+
+        if(request.isFuelPackage()){
+            total += FUEL_PACKAGE_FEE;
+        }
+
+        return total;
     }
 
     public AuthResponse cancelBooking(Long bookingId, Long userId) {

@@ -1,9 +1,8 @@
 package com.carrental.backend.entity.enums;
 
-public enum DocumentStatus {
+public enum PaymentStatus {
 
     PENDING,
-    VERIFIED,
-    REJECTED
-
+    SUCCESS,
+    FAILED
 }

@@ -1,9 +1,9 @@
 package com.carrental.backend.service;
 
 
-import com.carrental.backend.dto.AuthResponse;
-import com.carrental.backend.dto.LoginRequest;
-import com.carrental.backend.dto.RegisterRequest;
+import com.carrental.backend.dto.response.AuthResponse;
+import com.carrental.backend.dto.request.LoginRequest;
+import com.carrental.backend.dto.request.RegisterRequest;
 import com.carrental.backend.entity.User;
 import com.carrental.backend.entity.enums.UserRole;
 import com.carrental.backend.repository.UserRepository;

@@ -18,6 +18,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
 
     public JwtAuthenticationFilter(JwtUtil jwtUtil) {
+
         this.jwtUtil = jwtUtil;
     }
 
@@ -38,8 +39,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     new UsernamePasswordAuthenticationToken(email, null, List.of());
             SecurityContextHolder.getContext().setAuthentication(auth);
         }
-
-        System.out.println("JWT FILTER EXECUTED");
 
         filterChain.doFilter(request, response);
 

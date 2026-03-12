@@ -1,8 +1,8 @@
 package com.carrental.backend.controller;
 
-import com.carrental.backend.dto.AuthResponse;
-import com.carrental.backend.dto.BookingRequest;
-import com.carrental.backend.dto.BookingResponse;
+import com.carrental.backend.dto.response.AuthResponse;
+import com.carrental.backend.dto.request.BookingRequest;
+import com.carrental.backend.dto.response.BookingResponse;
 import com.carrental.backend.service.BookingService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +17,7 @@ public class BookingController {
     private final BookingService bookingService;
 
     public BookingController(BookingService bookingService) {
+
         this.bookingService = bookingService;
     }
 

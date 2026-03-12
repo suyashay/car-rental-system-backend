@@ -1,4 +1,4 @@
-package com.carrental.backend.dto;
+package com.carrental.backend.dto.response;
 
 import com.carrental.backend.entity.enums.BookingStatus;
 import lombok.AllArgsConstructor;
