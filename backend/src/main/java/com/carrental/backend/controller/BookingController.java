@@ -38,12 +38,12 @@ public class BookingController {
         );
     }
 
-    @PutMapping("/update-completed")
-    public ResponseEntity<String> updateCompleted(){
-
-        bookingService.updateCompletedBookings();
-        return ResponseEntity.ok("Completed bookings update");
-    }
+//    @PutMapping("/update-completed")
+//    public ResponseEntity<String> updateCompleted(){
+//
+//        bookingService.updateCompletedBookings();
+//        return ResponseEntity.ok("Completed bookings update");
+//    }
 
     @GetMapping("/my")
     public ResponseEntity<?>  getMyBookings(){

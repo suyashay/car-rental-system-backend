@@ -35,7 +35,7 @@ public class Booking {
     private double totalAmount;
 
     @Enumerated(EnumType.STRING)
-    private BookingStatus Status;
+    private BookingStatus status;
 
     private LocalDateTime createdAt;
 

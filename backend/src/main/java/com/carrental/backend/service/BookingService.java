@@ -18,10 +18,12 @@ import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
@@ -43,7 +45,8 @@ public class BookingService {
     public BookingService(
             BookingRepository bookingRepository,
             CarRepository carRepository,
-            UserRepository userRepository, DriverRepository driverRepository) {
+            UserRepository userRepository,
+            DriverRepository driverRepository) {
         this.bookingRepository = bookingRepository;
         this.carRepository = carRepository;
         this.userRepository = userRepository;
@@ -119,6 +122,7 @@ public class BookingService {
         booking.setUser(user);
         booking.setStartDate(request.getStartDate());
         booking.setEndDate(request.getEndDate());
+        booking.setCreatedAt(LocalDateTime.now());
         booking.setDriver(assignedDriver);
         booking.setWithDriver(request.isWithDriver());
         booking.setTotalAmount(totalAmount);
@@ -159,7 +163,7 @@ public class BookingService {
 
         User user = getAuthenticatedUser();
 
-        if(!booking.getUser().getId().equals(userId) &&  user.getRole() != UserRole.ADMIN) {
+        if(!booking.getUser().getId().equals(user.getId()) &&  user.getRole() != UserRole.ADMIN) {
             throw new RuntimeException("You are not authorized to cancel this booking");
         }
 
@@ -199,18 +203,20 @@ public class BookingService {
                 .toList();
     }
 
+    @Transactional
     public void updateCompletedBookings() {
 
         List<Booking> bookings =
-                bookingRepository.findByStatusAndEndDateLessThan(
+                bookingRepository.findByStatusAndEndDateLessThanEqual(
                         BookingStatus.CONFIRMED,
                         LocalDate.now()
                 );
 
         for (Booking booking : bookings) {
+
             booking.setStatus(BookingStatus.COMPLETED);
 
-            if(booking.getDriver() != null) {
+            if (booking.getDriver() != null) {
                 booking.getDriver().setStatus(DriverStatus.AVAILABLE);
             }
         }

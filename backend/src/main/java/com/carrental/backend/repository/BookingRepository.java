@@ -4,6 +4,9 @@ import com.carrental.backend.entity.Booking;
 import com.carrental.backend.entity.Car;
 import com.carrental.backend.entity.enums.BookingStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -27,8 +30,21 @@ public interface BookingRepository extends JpaRepository<Booking,Long> {
             LocalDateTime time
     );
 
-    List<Booking> findByStatusAndEndDateLessThan(
+    List<Booking> findByStatusAndEndDateLessThanEqual(
             BookingStatus status,
-            LocalDate date);
+            LocalDate today
+    );
 
+//    @Modifying
+//    @Query("""
+//       UPDATE Booking b
+//       SET b.status = 'COMPLETED'
+//       WHERE b.status = 'CONFIRMED'
+//       AND b.endDate < :today
+//       """)
+//    int updateCompletedBookings(
+//            @Param("confirmed") BookingStatus confirmed,
+//            @Param("completed")  BookingStatus completed,
+//            @Param("today") LocalDate today
+//    );
 }
