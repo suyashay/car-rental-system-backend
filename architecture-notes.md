@@ -1,147 +1,171 @@
-Entities:
+# System Architecture Notes
+
+## Overview
+
+The Car Rental Backend System follows a layered architecture using Spring Boot.
+The system separates responsibilities into distinct layers to ensure maintainability and scalability.
+
+---
+
+# Architecture Layers
+
+Client
+↓
+Controller Layer
+↓
+Service Layer
+↓
+Repository Layer
+↓
+MySQL Database
+
+---
+
+# Layer Responsibilities
+
+### Controller Layer
+
+Responsible for handling HTTP requests and returning responses.
+
+Example controllers:
+
+* AuthController
+* CarController
+* BookingController
+* PaymentController
+* DriverController
+
+Controllers perform:
+
+* request validation
+* calling service methods
+* returning API responses
+
+---
+
+### Service Layer
+
+Contains all business logic.
+
+Examples of logic implemented:
+
+* booking validation
+* driver assignment
+* payment handling
+* booking cancellation
+* role authorization checks
+
+The service layer ensures that rules such as booking conflicts and driver availability are enforced.
+
+---
+
+### Repository Layer
+
+Responsible for interacting with the database using Spring Data JPA.
+
+Examples:
+
+* UserRepository
+* CarRepository
+* BookingRepository
+* DriverRepository
+* PaymentRepository
+
+Repositories provide:
+
+* CRUD operations
+* custom queries
+* pagination support
+
+---
+
+# Core Entities
+
+The system is built around the following entities:
 
 User
 Car
+Driver
 Booking
-Availability
-Document
 Payment
+Document
 
-User
-- id
-- name
-- email
-- password
-- role
+---
 
-Car
-- id
-- model
-- seats
-- pricePerDay
-- owner
+# Entity Relationships
 
-Booking
-- id
-- car
-- user
-- startDate
-- endDate
-- totalAmount
-- status
+User → Booking
+Owner → Car
+Driver → Booking
+Booking → Payment
+Driver → Document
 
-📌 SECTION 1 — Booking Conflict Logic
+These relationships allow the system to maintain connections between customers, vehicles, drivers, and payments.
 
-1 Problem
+---
 
-A car must not be double-booked for overlapping dates.
+# Booking Lifecycle
 
-Example 1:
-Existing booking:
-Start: 10 Jan
-End: 15 Jan
+Booking creation follows a structured lifecycle.
 
-New booking:
-Start: 12 Jan
-End: 18 Jan
+PENDING_PAYMENT
+↓
+CONFIRMED
+↓
+COMPLETED
 
-These overlap → reject.
+Alternative flow:
 
-Example 2:
-Existing booking:
-start: 10 Jan 
-end: 15 Jan
+PENDING_PAYMENT
+↓
+Payment timeout
+↓
+CANCELLED
 
-New booking:
-start: 16 Jan
-end: 20 Jan
+---
 
-No overlap → allow.
+# Background Jobs
 
+Two scheduler jobs run automatically.
 
-2 Overlap Condition
+## Booking Completion Job
 
-Two bookings overlap if:
-existing.startDate <= new.endDate
-AND
-existing.endDate >= new.startDate
+Condition:
 
-Why this works:
-If existing starts before new ends AND existing ends after new starts
-Then they share at least one day.
+status = CONFIRMED
+endDate ≤ today
 
-This condition covers all cases:
-full overlap
-partial overlap
-boundary overlap
+Action:
 
+booking.status → COMPLETED
+driver.status → AVAILABLE
 
-3 JPA Query Design
+---
 
-query:
-SELECT b FROM Booking b
-WHERE b.car.id = :carId
-AND b.startDate <= :newEndDate
-AND b.endDate >= :newStartDate
+## Payment Expiration Cleanup
 
-If this query returns any record → conflict exists.
+Condition:
 
+status = PENDING_PAYMENT
+createdAt < now - 30 minutes
 
-📌 SECTION 2 — Transaction Boundary Design
+Action:
 
-Problem:
-Booking creation involves multiple steps:
-Create booking
-Create payment
-Update booking status
+booking.status → CANCELLED
 
-If payment succeeds but booking update fails,
-system becomes inconsistent.
+---
 
-Example:
-Payment = SUCCESS
-Booking = not saved
+# Deployment Architecture
 
-Money taken, no booking record.
+The application is containerized using Docker.
 
-That is data corruption.
+Containers:
 
-Solution:
-Booking + Payment must run inside one transaction.
+backend container → Spring Boot API
+mysql container → MySQL database
 
-Meaning:
-If any step fails
-Entire operation rolls back
+Both containers run in the same Docker network and communicate using the container hostname.
 
-Using:
-@Transactional
+Example database connection:
 
-Ensures atomicity.
-Atomicity = All succeed or none succeed.
-
-
-## Future Architecture Improvements
-
-The current system focuses on core booking lifecycle logic.
-Several architectural improvements can enhance scalability,
-security, and production readiness.
-
-### Authentication Layer
-- Implement JWT based authentication
-- Remove userId from API requests
-- Extract authenticated user from security context
-
-### Scheduled Booking Completion
-- Replace manual completion endpoint
-- Use Spring Scheduler to automatically mark bookings as completed daily
-
-### Concurrency Control
-- Introduce transaction management for booking creation
-- Prevent race conditions during overlapping booking checks
-
-### Payment Integration
-- Introduce payment entity
-- Track payment status for bookings
-
-### Owner Booking Dashboard
-- Allow owners to view bookings for their vehicles
+jdbc:mysql://mysql:3306/car_rental_db
