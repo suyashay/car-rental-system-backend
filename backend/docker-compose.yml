@@ -15,10 +15,10 @@ services:
   backend:
     build: .
     container_name: car-rental-backend
-    depends_on:
-      - mysql
     ports:
       - "8080:8080"
+    depends_on:
+      - "mysql"
     environment:
       SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
       SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
