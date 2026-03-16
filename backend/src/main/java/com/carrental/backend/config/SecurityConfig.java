@@ -28,6 +28,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/auth/**",
+                                "/health",
                                 "/drivers/register"
                         ).permitAll()
                         .anyRequest().authenticated()
