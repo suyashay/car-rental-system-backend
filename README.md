@@ -7,6 +7,31 @@ The system includes **JWT authentication, role-based access control, booking con
 This project demonstrates **real-world backend architecture and business logic implementation using Spring Boot and MySQL**, deployed using **Docker containers**.
 
 ---
+## 🚀 Live API
+
+Health Check:
+
+http://<YOUR-IP>:8080/health
+
+Example:
+
+http://54.226.198.22:8080/health
+
+Response:
+
+Car Rental Backend Running
+
+---
+
+## Quick start
+Run using Docker:
+
+```bash
+mvn clean package -DskipTests
+docker-compose up --build
+```
+
+---
 
 # 📌 Project Overview
 
@@ -298,6 +323,31 @@ Docker Network
       │
       └── MySQL Container
 ```
+
+---
+
+---
+
+## Add Logging + Error Handling
+
+```md
+## ⚠️ Error Handling
+
+Example:
+
+```json
+{
+  "message": "Car not found",
+  "status": 400,
+  "time": "2026-03-17T12:30:00"
+}
+```
+
+## Request Logging
+
+Example logs:
+POST /auth/login | Status: 200 | Time: 45ms
+GET /bookings/my | Status: 401 | Time: 12ms
 
 ---
 
