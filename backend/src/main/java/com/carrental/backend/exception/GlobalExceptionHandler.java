@@ -5,6 +5,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.time.LocalDateTime;
+
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -13,7 +15,8 @@ public class GlobalExceptionHandler {
 
         ErrorResponse error = new ErrorResponse(
                 ex.getMessage(),
-                400
+                400,
+                LocalDateTime.now()
         );
 
         return ResponseEntity.badRequest().body(error);
